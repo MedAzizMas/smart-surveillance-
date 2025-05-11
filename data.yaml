@@ -1,0 +1,6 @@
+train: C:/Users/kamou/Desktop/guns.v1i.yolov8/train/images
+val: C:/Users/kamou/Desktop/guns.v1i.yolov8/valid/images
+test: C:/Users/kamou/Desktop/guns.v1i.yolov8/test/images
+
+nc: 7
+names: ['Grenade', 'Knife', 'Machine_guns', 'Pistol', 'Masked_Face', 'Bat', 'RPG']
