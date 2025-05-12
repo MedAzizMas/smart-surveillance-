@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+        img {
+            width: 80%;
+            border: 3px solid #58a6ff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+            margin-bottom: 30px;
+        }
+        .object-table {
+            margin: 20px auto;
+            width: 300px;
+            border: 2px solid #4CAF50;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #161b22;
+        }
+        .object-table th {
+            color: #4CAF50;
+            font-size: 20px;
+            padding-bottom: 10px;
+        }
+        .object-table td {
+            padding: 8px;
+            color: #c9d1d9;
+            border-bottom: 1px solid #30363d;
+        }
+        .btn-download {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #21262d;
+            color: #58a6ff;
+            border: 1px solid #58a6ff;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        .btn-download:hover {
+            background-color: #58a6ff;
+            color: #0d1117;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🔴 Real-Time Suspicious Object Detection</h1>
+
+    <!-- Buttons to switch model -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('switch_model', model_type='normal') }}">
+            <button>Detect Normal</button>
+        </a>
+        <a href="{{ url_for('switch_model', model_type='suspicious') }}">
+            <button>Detect Suspicious</button>
+        </a>
+    </div>
+
+    <!-- Live camera feed -->
+    <img src="{{ url_for('video_feed') }}" id="live-feed">
+
+    <!-- Detected objects -->
+    <div class="object-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>🎯 Objects Detected</th>
+                </tr>
+            </thead>
+            <tbody id="detected-classes">
+                <!-- Detected objects will appear here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Download button for recorded video -->
+    <a href="{{ url_for('static', filename='detections/recorded_live.mp4') }}" download class="btn-download">
+        ⬇️ Download Live Detection
+    </a>
+
+    <!-- Alarm sound -->
+    <audio id="alarmSound" src="{{ url_for('static', filename='sounds/alarm.mp3') }}" preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script>
+        // Update detected objects list
+        function fetchDetectedClasses() {
+            fetch('/get_detected_classes')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('detected-classes');
+                    tableBody.innerHTML = '';
+
+                    data.forEach(cls => {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.textContent = cls;
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        // Play alarm if suspicious object detected
+        function checkAlertStatus() {
+            fetch('/alert_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.alert) {
+                        document.getElementById('alarmSound').play();
+                        alert("⚠️ Suspicious object detected!");
+                    }
+                });
+        }
+
+        // Refresh object list and check alerts every 2 seconds
+        setInterval(fetchDetectedClasses, 6000);
+        setInterval(checkAlertStatus, 6000);
+    </script>
+
+</body>
+</html>

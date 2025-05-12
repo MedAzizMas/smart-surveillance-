@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Suspicious Object Detection - Video Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 30px;
+        }
+        h1, h2 {
+            margin-bottom: 30px;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        input[type="file"] {
+            padding: 8px;
+            background-color: #161b22;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2ea043;
+        }
+        .spinner-border {
+            display: none;
+            margin: 20px auto;
+        }
+        .result-section {
+            margin-top: 40px;
+        }
+        .detected-video {
+            width: 80%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+        }
+        .object-table {
+            margin: 30px auto;
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            width: 300px;
+            background-color: #222;
+            border-radius: 8px;
+        }
+        .object-table th {
+            font-size: 20px;
+            color: #4CAF50;
+        }
+        .download-btn {
+            margin-top: 20px;
+            background-color: #21262d;
+            border: 1px solid #58a6ff;
+            color: #58a6ff;
+        }
+        .download-btn:hover {
+            background-color: #58a6ff;
+            color: #0d1117;
+        }
+    </style>
+</head>
+<body>
+
+    {% if alert %}
+    <div class="alert alert-danger" role="alert" style="font-size:20px;">
+        ⚠️ Warning: Suspicious object detected in video!
+    </div>
+    {% endif %}
+
+    <h1>🎥 Suspicious Object Detection - Video</h1>
+
+    <!-- Buttons to switch model -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('switch_model', model_type='normal') }}">
+            <button>Detect Normal</button>
+        </a>
+        <a href="{{ url_for('switch_model', model_type='suspicious') }}">
+            <button>Detect Suspicious</button>
+        </a>
+    </div>
+
+    <!-- Upload video form -->
+    <form id="videoForm" action="{{ url_for('upload_video_actual') }}" method="POST" enctype="multipart/form-data" class="upload-section">
+        <input type="file" name="file" accept="video/*" required>
+        <br>
+        <button type="submit" onclick="showSpinner()">Detect in Video</button>
+    </form>
+
+    <div id="spinner" class="spinner-border text-primary" role="status">
+        <span class="sr-only">Analyzing Video...</span>
+    </div>
+
+    <!-- Detection result -->
+    <div class="result-section">
+        {% if detected_video %}
+            <h2>Result</h2>
+            <video controls class="detected-video">
+                <source src="{{ url_for('static', filename=detected_video) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            {% if object_names %}
+            <div class="object-table">
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th>🎯 Objects Detected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obj in object_names %}
+                        <tr>
+                            <td>{{ obj }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <a href="{{ url_for('static', filename=detected_video) }}" download class="btn download-btn">⬇️ Download Detection Video</a>
+        {% endif %}
+    </div>
+
+    <!-- Alarm sound -->
+    <audio id="alarmSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/alarm.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <!-- JavaScript -->
+    <script>
+        const alarmAudio = document.getElementById('alarmSound');
+        let alarmUnlocked = false;
+
+        // Déverrouiller l'audio au premier clic utilisateur
+        document.addEventListener('click', function unlockAudioOnce() {
+            if (!alarmUnlocked) {
+                alarmAudio.play().then(() => {
+                    alarmAudio.pause();
+                    alarmUnlocked = true;
+                    console.log("🔓 Audio unlocked for video detection.");
+                }).catch(err => {
+                    console.log("Unlock failed:", err);
+                });
+            }
+            document.removeEventListener('click', unlockAudioOnce);
+        });
+
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'block';
+        }
+
+        function playAlarm() {
+            if (alarmUnlocked) {
+                alarmAudio.play().catch(err => console.log("Play error:", err));
+            }
+        }
+
+        function monitorAlertStatus() {
+            setInterval(() => {
+                fetch('/alert_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.alert) {
+                        playAlarm();
+                        const warning = document.createElement('div');
+                        warning.innerHTML = "⚠️ Suspicious object detected in video!";
+                        warning.style.backgroundColor = "#ff4c4c";
+                        warning.style.color = "#fff";
+                        warning.style.padding = "15px";
+                        warning.style.position = "fixed";
+                        warning.style.bottom = "20px";
+                        warning.style.left = "50%";
+                        warning.style.transform = "translateX(-50%)";
+                        warning.style.borderRadius = "8px";
+                        warning.style.fontSize = "18px";
+                        warning.style.zIndex = "1000";
+                        document.body.appendChild(warning);
+
+                        setTimeout(() => {
+                            warning.remove();
+                        }, 5000);
+                    }
+                });
+            }, 2000);
+        }
+
+        monitorAlertStatus();
+    </script>
+
+</body>
+</html>

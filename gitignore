@@ -1,0 +1,77 @@
+
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environment folders
+env/
+venv/
+ENV/
+.venv/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+
+# Ignore model files and large data
+*.h5
+*.hdf5
+*.pkl
+*.pt
+*.ckpt
+*.joblib
+*.npy
+*.npz
+
+# Ignore videos and heavy media
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+# Ignore images
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.gif
+*.tif
+*.tiff
+
+# Ignore compressed files
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.tar.gz
+*.tgz
+
+# Ignore CSVs and datasets (optional)
+*.csv
+*.tsv
+*.xls
+*.xlsx
+
+# Ignore Git LFS pointer files
+.gitattributes
+
+# Ignore IDE folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore backup files
+*~
+*.bak
+*.swp
+*.swo
