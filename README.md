@@ -4,15 +4,19 @@ This branch contains the core components for video-based gait recognition, inclu
 
 ## 📁 Datasets
 1. **Human Body Segmentation**  
-   Custom dataset from Kaggle with annotated body masks
+   - 2,667 high-quality segmented person images  
+   - Professionally annotated masks  
+   - Filtered to remove low-quality markup  
+   https://www.kaggle.com/datasets/tapakah68/supervisely-filtered-segmentation-person-dataset
 
-2. **Gait Recognition**  
+3. **Gait Recognition**  
    Modified CASIA-B dataset extended with custom subject (#125)  
-   Contains walking sequences from multiple angles
+   - Contains walking sequences from multiple angles  
+   - Original dataset + custom subject data 
 
 ## Model Components
 
-### 1. Human Body Segmentation (`segmentation.py`)
+### 1. Human Body Segmentation (`Human_body_segmentation..ipynb`)
 - U-Net architecture for frame-by-frame body segmentation
 - Processes 128×128 RGB frames → 128×128 binary masks
 - Features:  
@@ -20,7 +24,7 @@ This branch contains the core components for video-based gait recognition, inclu
   ✔ Batch training with 16 samples  
   ✔ Model checkpointing each epoch
 
-### 2. Gait Recognition (`cstl_without.py`)
+### 2. Gait Recognition (`CSTL.ipynb`)
 - CNN-Spatial Temporal Learning (CSTL) model
 - Processes sequences of 16 segmented frames (64×64)
 - Key features:  
